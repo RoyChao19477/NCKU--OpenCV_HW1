@@ -37,6 +37,11 @@ if 'state_4' not in st.session_state:
 if 'state_5' not in st.session_state:
     st.session_state['state_5'] = 0
 
+# ----- Warning Part -----
+st.write("Github: [https://github.com/RoyChao19477/opencv_hw1](https://github.com/RoyChao19477/opencv_hw1)")
+st.write("Author: F14071075@2021")
+# ----- end -----
+
 # ------- HW1 - 1 -------
 if topic == '(1) Image Prcessing':
     st.header("Image Processing")
