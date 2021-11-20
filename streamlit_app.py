@@ -397,8 +397,8 @@ if topic == '(5) Training Cifar-10 Classifier Using VGG16':
             st.write("  Width: ", cv_image_0.shape[1])
         # show image
         st.image(cv_image_0, channels="BGR")
-        torch.cuda.is_avalible()
-        torch.cuda.device[0]
+        st.write( torch.cuda.is_avalible() )
+        st.write( torch.cuda.device[0] )
         
     # ------- end -------
 
