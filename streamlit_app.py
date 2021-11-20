@@ -3,6 +3,7 @@ import streamlit as st
 import cv2
 import numpy as np
 import pandas as pd
+import torch
 
 # ------- init setting -------
 st.set_page_config(
@@ -36,6 +37,11 @@ if 'state_4' not in st.session_state:
     st.session_state['state_4'] = 0
 if 'state_5' not in st.session_state:
     st.session_state['state_5'] = 0
+
+# ----- Warning Part -----
+st.write("Github: [https://github.com/RoyChao19477/opencv_hw1](https://github.com/RoyChao19477/opencv_hw1)")
+st.write("Author: F14071075@2021")
+# ----- end -----
 
 # ------- HW1 - 1 -------
 if topic == '(1) Image Prcessing':
@@ -391,6 +397,9 @@ if topic == '(5) Training Cifar-10 Classifier Using VGG16':
             st.write("  Width: ", cv_image_0.shape[1])
         # show image
         st.image(cv_image_0, channels="BGR")
+        torch.cuda.is_avalible()
+        torch.cuda.device[0]
+        
     # ------- end -------
 
 # ------- end -------
