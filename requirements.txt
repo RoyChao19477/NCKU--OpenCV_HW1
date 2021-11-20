@@ -1,3 +1,4 @@
+opencv-python-headless
 altair==4.1.0
 argon2-cffi==21.1.0
 astor==0.8.1
@@ -83,4 +84,3 @@ watchdog==2.1.6
 wcwidth==0.2.5
 webencodings==0.5.1
 widgetsnbextension==3.5.2
-opencv-python-headless==4.5.4.58
