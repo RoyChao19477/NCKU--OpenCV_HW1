@@ -1,4 +1,5 @@
 opencv-python-headless
+opencv-contrib-python
 altair==4.1.0
 argon2-cffi==21.1.0
 astor==0.8.1
