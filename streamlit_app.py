@@ -3,7 +3,6 @@ import streamlit as st
 import cv2
 import numpy as np
 import pandas as pd
-import torch
 
 # ------- init setting -------
 st.set_page_config(
@@ -397,9 +396,6 @@ if topic == '(5) Training Cifar-10 Classifier Using VGG16':
             st.write("  Width: ", cv_image_0.shape[1])
         # show image
         st.image(cv_image_0, channels="BGR")
-        st.write( torch.cuda.is_available() )
-        st.write( torch.cuda.device[0] )
-        
     # ------- end -------
 
 # ------- end -------
