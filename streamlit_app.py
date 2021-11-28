@@ -478,7 +478,7 @@ if topic == '(5) Training Cifar-10 Classifier Using VGG16':
                         columns=['train Accu', 'test Accu']) 
                     )
         
-        if st.button("Predict:"):
+        if st.button("Use model to predict:"):
             st.session_state.state_5 = 4
         if st.session_state.state_5 >= 4:
             path = "VGG16/VGG16_epoch100.pt"
@@ -498,7 +498,6 @@ if topic == '(5) Training Cifar-10 Classifier Using VGG16':
             model2.eval()
 
 
-        if st.button("Use model to predict:"):
             dataiter = iter(trainloader)
             images, labels = dataiter.next()
             image = images / 2 + 0.5
