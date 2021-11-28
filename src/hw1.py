@@ -4,6 +4,16 @@ import cv2
 import numpy as np
 import pandas as pd
 
+
+from model import VGG16
+from model import VGG16_bn
+from torchsummary import summary
+import torch
+import torchvision
+import torchvision.transforms as transforms
+import torch.optim as optim
+from torch.utils.data import DataLoader
+
 # ------- init setting -------
 st.set_page_config(
     page_title="Computer Vision HW1 - F14071075",
@@ -41,6 +51,10 @@ if 'state_5' not in st.session_state:
 st.write("Github: [https://github.com/RoyChao19477/opencv_hw1](https://github.com/RoyChao19477/opencv_hw1)")
 st.write("Author: F14071075@2021")
 # ----- end -----
+
+# used function
+def no_fn():
+    pass
 
 # ------- HW1 - 1 -------
 if topic == '(1) Image Prcessing':
@@ -113,17 +127,19 @@ if topic == '(1) Image Prcessing':
             st.subheader("Blending")
             image_1 = st.file_uploader("Upload 1 of 2 Image to combine", type='jpg')
             image_2 = st.file_uploader("Upload 2 of 2 Image to combine", type='jpg')
-            weight = st.slider("Weight:", 0, 100) / 100
 
             if (image_1 is not None) and (image_2 is not None):
+                weight = st.slider("Weight:", 0, 100, on_change=no_fn() ) / 100
+                
                 cv_image_1 = cv2.imdecode(np.asarray(bytearray(image_1.read()), dtype=np.uint8), 1)
                 cv_image_2 = cv2.imdecode(np.asarray(bytearray(image_2.read()), dtype=np.uint8), 1)
                 cv_image_cat = np.concatenate((
                         cv_image_1, cv_image_2
                     ) , axis=1)
                 st.image(cv_image_cat, channels="BGR")
-                dest = cv2.addWeighted( cv_image_1, weight, cv_image_2, 1-weight, 0)
+                dest = cv2.addWeighted( cv_image_1, 1-weight, cv_image_2, weight, 0)
                 st.image(dest, channels="BGR")
+
     # ------- end -------
 # ------- end -------
 
@@ -252,7 +268,7 @@ if topic == '(3) Edge Detection':
         if st.button("Sobel X:"):
             st.session_state.state_3 = 5
         if st.session_state.state_3 >= 5:
-            st.write("If result < 0 -> 0")
+            st.write("If result < 0 -> abs()")
             st.write("If result > 255 -> 255")
             sobel_x = np.array(
                     [
@@ -266,7 +282,7 @@ if topic == '(3) Edge Detection':
                 for j in range(img2.shape[1]):
                     val = (gray[ i:i+3, j:j+3 ] * sobel_x).sum()
                     if val < 0: 
-                        val = 0
+                        val = -val
                     if val > 255:
                         val = 255
                     img2[i, j] = val
@@ -276,7 +292,7 @@ if topic == '(3) Edge Detection':
         if st.button("Sobel Y:"):
             st.session_state.state_3 = 6
         if st.session_state.state_3 >= 6:
-            st.write("If result < 0 -> 0")
+            st.write("If result < 0 -> abs(result)")
             st.write("If result > 255 -> 255")
             sobel_x = np.array(
                     [
@@ -290,7 +306,7 @@ if topic == '(3) Edge Detection':
                 for j in range(img3.shape[1]):
                     val2 = (gray[ i:i+3, j:j+3 ] * sobel_x).sum()
                     if val2 < 0: 
-                        val2 = 0
+                        val2 = -val2
                     if val2 > 255:
                         val2 = 255
                     img3[i, j] = val2
@@ -358,7 +374,7 @@ if topic == '(4) Transforms':
             # show rotate
             st.subheader("Rotate")
             M = cv2.getRotationMatrix2D(
-                    (int(188),int(128)), 10, 0.5)
+                    (int(128),int(188)), 10, 0.5)
             cv_image_rotate = cv2.warpAffine(cv_image_trans, M, (400,300))
             st.image(cv_image_rotate, channels="BGR")
 
@@ -382,22 +398,132 @@ if topic == '(5) Training Cifar-10 Classifier Using VGG16':
     st.header("Training Cifar-10 Classifier Using VGG16")
 
     # ------- Upload a Picture -------
-    image_0 = st.file_uploader("Upload Image", type=['jpg', 'png'])
 
-    if image_0 is not None:
-        file_bytes = np.asarray(bytearray(image_0.read()), dtype=np.uint8)
-        cv_image_0 = cv2.imdecode(file_bytes, 1)
+    if st.button("Load PyTorch:"):
+        st.session_state.state_5 = 1
+    if st.session_state.state_5 >= 1:
+        st.write("Loading...")
+        transform = transforms.Compose(
+                    [transforms.ToTensor(),
+                             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+        batch_size = 1
+        trainset = torchvision.datasets.CIFAR10(root='/home/roy/2_OpenCV2021/hw1/src/CIFAR-10', train=True,
+                                                        download=False, transform=transform)
+        trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,
+                                                          shuffle=True, num_workers=2)
 
-        if st.button("Show Image Detail:"):
-            st.write("  Shape: ", cv_image_0.shape)
-            st.write("  Size: ", cv_image_0.size)
-            st.write("  Data Type: ", cv_image_0.dtype)
-            st.write("  Height: ", cv_image_0.shape[0])
-            st.write("  Width: ", cv_image_0.shape[1])
-        # show image
-        st.image(cv_image_0, channels="BGR")
+        testset = torchvision.datasets.CIFAR10(root='/home/roy/2_OpenCV2021/hw1/src/CIFAR-10', train=False,
+                                                       download=False, transform=transform)
+        testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size,
+                                                         shuffle=False, num_workers=2)
+        classes = ('plane', 'car', 'bird', 'cat',
+                           'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
+        # get some random training images
+        st.write("Finished!")
+        
+        if st.button("Show Samples:"):
+            dataiter = iter(trainloader)
+            for i in range(9):
+                images, labels = dataiter.next()
+                image = images / 2 + 0.5
+                image = image / image.max() * 255
+                image = image.squeeze(0).permute(1, 2, 0).repeat_interleave(4, dim=0).repeat_interleave(4, dim=1).numpy().astype(int)
+                st.write("This is: ", classes[labels.item()])
+                st.image(image)
+        
+        if st.button("VGG16 hyperparameters:"):
+            st.session_state.state_5 = 2
+        if st.session_state.state_5 >= 2:
+            st.text("VGG16 hparameters: ")
+            st.text("  batch size:     32")
+            st.text("  learning rate;  0.0001")
+            st.text("  optimizer:      Adam")
+        
+            st.text("VGG16 BatchNorm2dhparameters: ")
+            st.text("  batch size:     32")
+            st.text("  learning rate;  0.0001")
+            st.text("  optimizer:      Adam")
+     
+        if st.button("Model Structure: VGG16"):
+            st.code( summary(VGG16(), (3, 64, 64)) )
+        
+        if st.button("Model Structure: VGG16 with BatchNorm2d"):
+            st.code( summary(VGG16_bn(), (3, 64, 64)) )
+
+        if st.button("Loss and Accurancy:"):
+            st.session_state.state_5 = 3
+        if st.session_state.state_5 >= 3:
+            st.write("VGG16 100epoch")
+            train_loss = np.loadtxt("VGG16/train_loss.csv", delimiter=',')
+            test_loss = np.loadtxt("VGG16/test_loss.csv", delimiter=',')
+            st.line_chart( 
+                    pd.DataFrame( 
+                        np.transpose( np.stack((train_loss, test_loss)), (1, 0)),
+                        columns=['train loss', 'test loss']) 
+                    )
+            
+            st.write("VGG16 BatchNorm2d 100epoch")
+            train_loss2 = np.loadtxt("VGG16/train_loss_bn.csv", delimiter=',')
+            test_loss2 = np.loadtxt("VGG16/test_loss_bn.csv", delimiter=',')
+            st.line_chart( 
+                    pd.DataFrame( 
+                        np.transpose( np.stack((train_loss2, test_loss2)), (1, 0)),
+                        columns=['train loss', 'test loss']) 
+                    )
+            train_loss3 = np.loadtxt("VGG16/train_accu_bn.csv", delimiter=',')
+            test_loss3 = np.loadtxt("VGG16/test_accu_bn.csv", delimiter=',')
+            st.line_chart( 
+                    pd.DataFrame( 
+                        np.transpose( np.stack((train_loss3, test_loss3)), (1, 0)),
+                        columns=['train Accu', 'test Accu']) 
+                    )
+        
+        if st.button("Predict:"):
+            st.session_state.state_5 = 4
+        if st.session_state.state_5 >= 4:
+            image_0 = st.file_uploader("Upload Image", type=['jpg', 'png'])
+
+            path = "/home/roy/2_OpenCV2021/hw1/src/VGG16_epoch100.pt" 
+            model = VGG16()
+            device = torch.device('cpu')
+            model.to(device)
+            cpt = torch.load(path, map_location=device)
+            model.load_state_dict(cpt)
+            model.eval()
+            
+            path = "/home/roy/2_OpenCV2021/hw1/src/VGG16bn_epoch100.pt" 
+            model2 = VGG16_bn()
+            device = torch.device('cpu')
+            model2.to(device)
+            cpt = torch.load(path, map_location=device)
+            model2.load_state_dict(cpt)
+            model2.eval()
+
+
+        if st.button("Use model to predict:"):
+            dataiter = iter(trainloader)
+            images, labels = dataiter.next()
+            image = images / 2 + 0.5
+            image = image / image.max() * 255
+            image = image.squeeze(0).permute(1, 2, 0).repeat_interleave(4, dim=0).repeat_interleave(4, dim=1).numpy().astype(int)
+            st.write("Ground Truth: ", classes[labels.item()])
+            st.image(image)
+         
+            st.write("Pretrained VGG16 BatchNorm2d:")
+            pred = model(images)
+            st.code(pred)
+            _, predicted = torch.max(pred.data, 1)
+            st.code( classes[predicted.item()] )
+
+            st.write("Pretrained VGG16 BatchNorm2d:")
+            pred2 = model2(images)
+            st.code(pred2)
+            _, predicted2 = torch.max(pred2.data, 1)
+            st.code( classes[predicted2.item()] )
+
     # ------- end -------
 
 # ------- end -------
 # ------- end -------
 
+# ------ Torch ------
