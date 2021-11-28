@@ -129,7 +129,7 @@ if topic == '(1) Image Prcessing':
             image_2 = st.file_uploader("Upload 2 of 2 Image to combine", type='jpg')
 
             if (image_1 is not None) and (image_2 is not None):
-                weight = st.slider("Weight:", 100, 0, on_change=no_fn() ) / 100
+                weight = st.slider("Weight:", 0, 100, on_change=no_fn() ) / 100
                 
                 cv_image_1 = cv2.imdecode(np.asarray(bytearray(image_1.read()), dtype=np.uint8), 1)
                 cv_image_2 = cv2.imdecode(np.asarray(bytearray(image_2.read()), dtype=np.uint8), 1)
