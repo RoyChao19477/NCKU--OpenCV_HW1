@@ -134,10 +134,10 @@ if topic == '(1) Image Prcessing':
                 cv_image_1 = cv2.imdecode(np.asarray(bytearray(image_1.read()), dtype=np.uint8), 1)
                 cv_image_2 = cv2.imdecode(np.asarray(bytearray(image_2.read()), dtype=np.uint8), 1)
                 cv_image_cat = np.concatenate((
-                        cv_image_1, cv_image_2
+                        cv_image_2, cv_image_1
                     ) , axis=1)
                 st.image(cv_image_cat, channels="BGR")
-                dest = cv2.addWeighted( cv_image_1, 1-weight, cv_image_2, weight, 0)
+                dest = cv2.addWeighted( cv_image_1, weight, cv_image_2,1- weight, 0)
                 st.image(dest, channels="BGR")
 
     # ------- end -------
@@ -407,12 +407,12 @@ if topic == '(5) Training Cifar-10 Classifier Using VGG16':
                     [transforms.ToTensor(),
                              transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
         batch_size = 1
-        trainset = torchvision.datasets.CIFAR10(root='/home/roy/2_OpenCV2021/hw1/src/CIFAR-10', train=True,
+        trainset = torchvision.datasets.CIFAR10(root='VGG16/CIFAR-10', train=True,
                                                         download=False, transform=transform)
         trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,
                                                           shuffle=True, num_workers=2)
 
-        testset = torchvision.datasets.CIFAR10(root='/home/roy/2_OpenCV2021/hw1/src/CIFAR-10', train=False,
+        testset = torchvision.datasets.CIFAR10(root='VGG16/CIFAR-10', train=False,
                                                        download=False, transform=transform)
         testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size,
                                                          shuffle=False, num_workers=2)
@@ -478,12 +478,10 @@ if topic == '(5) Training Cifar-10 Classifier Using VGG16':
                         columns=['train Accu', 'test Accu']) 
                     )
         
-        if st.button("Predict:"):
+        if st.button("Use model to predict:"):
             st.session_state.state_5 = 4
         if st.session_state.state_5 >= 4:
-            image_0 = st.file_uploader("Upload Image", type=['jpg', 'png'])
-
-            path = "/home/roy/2_OpenCV2021/hw1/src/VGG16_epoch100.pt" 
+            path = "VGG16/VGG16_epoch100.pt"
             model = VGG16()
             device = torch.device('cpu')
             model.to(device)
@@ -491,7 +489,7 @@ if topic == '(5) Training Cifar-10 Classifier Using VGG16':
             model.load_state_dict(cpt)
             model.eval()
             
-            path = "/home/roy/2_OpenCV2021/hw1/src/VGG16bn_epoch100.pt" 
+            path = "VGG16/VGG16bn_epoch100.pt"
             model2 = VGG16_bn()
             device = torch.device('cpu')
             model2.to(device)
@@ -500,7 +498,6 @@ if topic == '(5) Training Cifar-10 Classifier Using VGG16':
             model2.eval()
 
 
-        if st.button("Use model to predict:"):
             dataiter = iter(trainloader)
             images, labels = dataiter.next()
             image = images / 2 + 0.5
