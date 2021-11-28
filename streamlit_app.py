@@ -137,7 +137,7 @@ if topic == '(1) Image Prcessing':
                         cv_image_2, cv_image_1
                     ) , axis=1)
                 st.image(cv_image_cat, channels="BGR")
-                dest = cv2.addWeighted( cv_image_1, 1-weight, cv_image_2, weight, 0)
+                dest = cv2.addWeighted( cv_image_1, weight, cv_image_2,1- weight, 0)
                 st.image(dest, channels="BGR")
 
     # ------- end -------
