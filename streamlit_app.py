@@ -481,8 +481,6 @@ if topic == '(5) Training Cifar-10 Classifier Using VGG16':
         if st.button("Predict:"):
             st.session_state.state_5 = 4
         if st.session_state.state_5 >= 4:
-            image_0 = st.file_uploader("Upload Image", type=['jpg', 'png'])
-
             path = "VGG16/VGG16_epoch100.pt"
             model = VGG16()
             device = torch.device('cpu')
